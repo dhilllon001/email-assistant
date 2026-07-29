@@ -17,7 +17,6 @@ import {
   UserX,
   CornerUpLeft,
   X,
-  Users,
   Command,
   Undo2,
   Zap,
@@ -96,30 +95,6 @@ function Menu({ label, value, options, onPick, active, align, counts }) {
           ))}
         </div>
       )}
-    </div>
-  )
-}
-
-function AttachmentLine({ files, onOpen }) {
-  if (!files?.length) return null
-  return (
-    <div className="att-line">
-      <span className="att-line-label">Attachments</span>
-      <div className="att-line-links">
-        {files.map((a, i) => (
-          <span key={a.name} className="att-line-item">
-            {i > 0 && <span className="att-line-sep">·</span>}
-            <button
-              type="button"
-              className="att-link"
-              onClick={() => onOpen(a)}
-              title={`${a.name} (${a.size})`}
-            >
-              {a.name}
-            </button>
-          </span>
-        ))}
-      </div>
     </div>
   )
 }
@@ -463,12 +438,8 @@ export default function App() {
 
         <section className="pane thread">
           <div className="thread-hd">
-            <h1>{sel.subject}</h1>
-            <div className="thread-meta">
-              <span className="chip po mono">{sel.po}</span>
-              <span className="chip ref mono">{sel.ref}</span>
-              <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--label-2)' }}>{sel.lane}</span>
-              <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--label-3)' }}>· 1 message</span>
+            <div className="thread-hd-top">
+              <h1>{sel.subject}</h1>
               <div className="nav">
                 <button onClick={() => step(-1)} title="Previous (K)">
                   <ChevronLeft size={15} />
@@ -479,6 +450,11 @@ export default function App() {
                 </button>
               </div>
             </div>
+            <div className="thread-meta">
+              <span className="chip po mono">{sel.po}</span>
+              <span className="chip ref mono">{sel.ref}</span>
+              <span className="thread-lane">{sel.lane}</span>
+            </div>
           </div>
 
           <div className="scroll">
@@ -488,44 +464,60 @@ export default function App() {
             </div>
 
             <article className="msg" key={sel.id}>
-              <div className="msg-hd">
-                <Ring value={sel.confidence} initials={sel.initials} />
-                <div className="who">
-                  <b>{sel.from}</b>
-                  <small className="mono">{sel.email}</small>
-                </div>
-                <div className="msg-hd-right">
-                  <AttachmentLine files={sel.attachments} onOpen={setOpenFile} />
-                  <span className="mono msg-stamp">{sel.stamp}</span>
-                </div>
-              </div>
-
-              <div className="rcpt">
-                <span style={{ color: 'var(--label-3)' }}>to</span>
-                <span>{sel.to[0].split('@')[0].replace('.', ' ')}</span>
-                <button onClick={() => setShowRcpt(!showRcpt)}>
-                  <Users size={11} />
-                  {sel.to.length - 1 + sel.ccCount} more
-                  <ChevronDown size={11} style={{ transform: showRcpt ? 'rotate(180deg)' : 'none' }} />
-                </button>
-              </div>
-
-              {showRcpt && (
-                <div className="rcpt-full mono">
-                  <div>
-                    <em>To</em>
-                    {sel.to.join(', ')}
+              <div className="mail-head">
+                <div className="mail-from">
+                  <Ring value={sel.confidence} initials={sel.initials} />
+                  <div className="who">
+                    <div className="who-line">
+                      <b>{sel.from}</b>
+                      <span className="mono who-email">&lt;{sel.email}&gt;</span>
+                    </div>
+                    <div className="mail-field">
+                      <span className="mail-label">To:</span>
+                      <span className="mail-value">
+                        {showRcpt
+                          ? sel.to.join('; ')
+                          : `${sel.to[0]}${sel.to.length + sel.ccCount > 1 ? `; +${sel.to.length - 1 + sel.ccCount} more` : ''}`}
+                      </span>
+                      {(sel.to.length > 1 || sel.ccCount > 0) && (
+                        <button type="button" className="mail-more" onClick={() => setShowRcpt(!showRcpt)}>
+                          {showRcpt ? 'Hide' : 'Details'}
+                          <ChevronDown size={12} style={{ transform: showRcpt ? 'rotate(180deg)' : 'none' }} />
+                        </button>
+                      )}
+                    </div>
+                    {showRcpt && (
+                      <div className="mail-field">
+                        <span className="mail-label">Cc:</span>
+                        <span className="mail-value">{sel.ccCount} recipients on distribution list</span>
+                      </div>
+                    )}
                   </div>
-                  <div style={{ marginTop: 6 }}>
-                    <em>Cc</em>
-                    {sel.ccCount} recipients on distribution list
-                  </div>
+                  <time className="mono mail-date">{sel.stamp}</time>
                 </div>
-              )}
 
-              <div className="msg-highlights">
-                <span className="chip po mono">{sel.po}</span>
-                <span className="chip ref mono">{sel.ref}</span>
+                {sel.attachments.length > 0 && (
+                  <div className="mail-atts">
+                    <div className="mail-atts-label">
+                      <Paperclip size={13} />
+                      {sel.attachments.length} Attachment{sel.attachments.length > 1 ? 's' : ''}
+                    </div>
+                    <div className="mail-atts-list">
+                      {sel.attachments.map((a) => (
+                        <button
+                          key={a.name}
+                          type="button"
+                          className="mail-att-item"
+                          onClick={() => setOpenFile(a)}
+                          title={`${a.name} (${a.size})`}
+                        >
+                          <span className="mail-att-name">{a.name}</span>
+                          <span className="mono mail-att-size">{a.size}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="msg-body">{sel.body}</div>
