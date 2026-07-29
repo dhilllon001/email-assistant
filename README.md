@@ -1,13 +1,15 @@
 # Charger AI · Email Assistant
 
-Apple-inspired review console for AI-drafted freight email replies.
+Apple-style review console for AI-drafted replies on inbound freight mail.
+
+**Live demo:** https://dhilllon001.github.io/email-assistant/
 
 ## Features
 
-- Light and dark themes (system-aware, toggle in header)
-- Three-pane layout: inbox queue · thread · AI draft
-- Confidence rings, bulk approve, language/tone switching
-- Keyboard shortcuts: `J`/`K` move · `E` edit · `A` approve · `⌘⏎` send · `/` search
+- Three-pane inbox queue · thread · AI draft reply
+- Light and dark themes (SF system look, frosted bars, system blue/green)
+- Confidence rings, bulk approve, language & tone switching
+- Keyboard shortcuts: `J`/`K` move, `E` edit, `A` approve, `⌘⏎` send, `/` search
 
 ## Develop
 
@@ -16,13 +18,9 @@ npm install
 npm run dev
 ```
 
-## Build
+## Deploy (GitHub Pages)
 
 ```bash
 npm run build
-npm run preview
+# push to main — Pages serves /docs or gh-pages as configured
 ```
-
-## Live
-
-GitHub Pages: https://dhilllon001.github.io/email-assistant/

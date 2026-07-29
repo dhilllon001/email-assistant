@@ -25,23 +25,21 @@ import {
   Sun,
   Moon,
 } from 'lucide-react'
-import { AUTO_OK, EMAILS, INTENTS, TIERS } from './data'
+import { EMAILS, TIERS, INTENTS, AUTO_OK } from './data'
+
+function confColor(value) {
+  if (value >= AUTO_OK) return 'var(--green)'
+  if (value >= 80) return 'var(--orange)'
+  return 'var(--red)'
+}
 
 function Ring({ value, initials }) {
   const c = 2 * Math.PI * 15
-  const tone =
-    value >= AUTO_OK ? 'var(--green)' : value >= 80 ? 'var(--orange)' : 'var(--red)'
+  const tone = confColor(value)
   return (
     <div className="ava" title={`AI confidence ${value}%`}>
       <svg viewBox="0 0 34 34" aria-hidden="true">
-        <circle
-          cx="17"
-          cy="17"
-          r="15"
-          fill="none"
-          stroke="var(--ring-track)"
-          strokeWidth="2.5"
-        />
+        <circle cx="17" cy="17" r="15" fill="none" stroke="var(--ring-track)" strokeWidth="2.5" />
         <circle
           cx="17"
           cy="17"
@@ -99,14 +97,23 @@ function Menu({ label, value, options, onPick, active, align }) {
   )
 }
 
-function getInitialTheme() {
-  const saved = localStorage.getItem('ea-theme')
-  if (saved === 'light' || saved === 'dark') return saved
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+function useTheme() {
+  const [theme, setTheme] = useState(() => {
+    const saved = localStorage.getItem('ca-theme')
+    if (saved === 'light' || saved === 'dark') return saved
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  })
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme)
+    localStorage.setItem('ca-theme', theme)
+  }, [theme])
+
+  return [theme, setTheme]
 }
 
 export default function App() {
-  const [theme, setTheme] = useState(getInitialTheme)
+  const [theme, setTheme] = useTheme()
   const [selId, setSelId] = useState('e1')
   const [tab, setTab] = useState('Pending')
   const [tier, setTier] = useState('All tiers')
@@ -120,11 +127,6 @@ export default function App() {
   const [kebab, setKebab] = useState(false)
   const [toast, setToast] = useState(null)
   const editorRef = useRef(null)
-
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme)
-    localStorage.setItem('ea-theme', theme)
-  }, [theme])
 
   const counts = useMemo(
     () => ({
@@ -156,19 +158,13 @@ export default function App() {
   )
 
   const sel = EMAILS.find((e) => e.id === selId) || list[0] || EMAILS[0]
-  const selTone =
-    sel.tones.find((t) => t.id === (tone[sel.id] || sel.tones[0].id)) || sel.tones[0]
+  const selTone = sel.tones.find((t) => t.id === (tone[sel.id] || sel.tones[0].id)) || sel.tones[0]
   const selLang = lang[sel.id] || sel.langs[0]
   const generated = selTone[selLang] || selTone[sel.langs[0]]
   const text = drafts[sel.id] !== undefined ? drafts[sel.id] : generated
   const dirty = drafts[sel.id] !== undefined && drafts[sel.id] !== generated
   const bulk = list.filter((e) => !status[e.id] && e.confidence >= AUTO_OK)
-  const confTone =
-    sel.confidence >= AUTO_OK
-      ? 'var(--green)'
-      : sel.confidence >= 80
-        ? 'var(--orange)'
-        : 'var(--red)'
+  const confTone = confColor(sel.confidence)
 
   const step = (dir) => {
     const i = list.findIndex((e) => e.id === sel.id)
@@ -211,8 +207,9 @@ export default function App() {
 
   const onEdit = (v) => {
     setDrafts((d) => ({ ...d, [sel.id]: v }))
-    if (v !== generated)
+    if (v !== generated) {
       setStatus((s) => (s[sel.id] === 'approved' ? s : { ...s, [sel.id]: 'edited' }))
+    }
   }
 
   useEffect(() => {
@@ -223,7 +220,7 @@ export default function App() {
         approve()
         return
       }
-      if (e.key === '/' && !typing) {
+      if (!typing && e.key === '/') {
         e.preventDefault()
         document.querySelector('.search input')?.focus()
         return
@@ -262,7 +259,7 @@ export default function App() {
         </div>
 
         <label className="search">
-          <Search size={14} strokeWidth={1.75} />
+          <Search size={15} />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -274,15 +271,15 @@ export default function App() {
         <div className="top-right">
           <div className="pending-chip">
             <b>{counts.Pending}</b>
-            <span>pending</span>
+            <span>pending review</span>
           </div>
           <button
             className="theme-toggle"
-            onClick={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))}
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
             title={theme === 'dark' ? 'Switch to light' : 'Switch to dark'}
             aria-label="Toggle theme"
           >
-            {theme === 'dark' ? <Sun size={16} strokeWidth={1.75} /> : <Moon size={16} strokeWidth={1.75} />}
+            {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
           </button>
           <div className="user">
             <div className="user-ava">AS</div>
@@ -294,10 +291,13 @@ export default function App() {
       <div className="body">
         <section className="pane queue">
           <div className="pane-hd">
-            <Inbox size={15} color="var(--blue)" strokeWidth={1.75} />
+            <Inbox size={16} style={{ color: 'var(--blue)' }} />
             <h2>Inbox queue</h2>
+            <span className="mono" style={{ color: 'var(--label-3)', fontSize: 12 }}>
+              {list.length}
+            </span>
             <button className="icon-btn" style={{ marginLeft: 'auto' }} title="Refresh">
-              <RefreshCw size={14} strokeWidth={1.75} />
+              <RefreshCw size={14} />
             </button>
           </div>
 
@@ -311,7 +311,7 @@ export default function App() {
           </div>
 
           <div className="filters">
-            <Filter size={13} color="var(--label-3)" style={{ flex: '0 0 auto' }} />
+            <Filter size={13} style={{ color: 'var(--label-3)', flex: '0 0 auto' }} />
             <Menu value={tier} options={TIERS} onPick={setTier} active={tier !== 'All tiers'} />
             <Menu
               value={intent === 'All intents' ? 'All intents' : intent.split(' ')[0]}
@@ -323,7 +323,7 @@ export default function App() {
 
           {bulk.length > 1 && (
             <div className="bulk">
-              <Zap size={15} color="var(--green)" style={{ flex: '0 0 auto' }} />
+              <Zap size={15} style={{ color: 'var(--green)', flex: '0 0 auto' }} />
               <p>
                 <b className="mono">{bulk.length}</b> drafts at {AUTO_OK}%+ confidence
                 <br />
@@ -338,9 +338,9 @@ export default function App() {
 
           {list.length === 0 ? (
             <div className="empty">
-              <Check size={22} color="var(--green)" />
+              <Check size={22} style={{ color: 'var(--green)' }} />
               <b>Queue clear</b>
-              <span>New mail lands here as it arrives.</span>
+              <span style={{ fontSize: 12 }}>New mail lands here as it arrives.</span>
             </div>
           ) : (
             <div className="list">
@@ -376,10 +376,7 @@ export default function App() {
                           <span className="tag mute">{e.sub.split(' / ')[0]}</span>
                         )}
                         {e.attachments.length > 0 && (
-                          <span
-                            className="chip"
-                            style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}
-                          >
+                          <span className="chip" style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
                             <Paperclip size={10} />
                             {e.attachments.length}
                           </span>
@@ -419,11 +416,11 @@ export default function App() {
               <span style={{ fontSize: 12, color: 'var(--label-3)' }}>· 1 message</span>
               <div className="nav">
                 <button onClick={() => step(-1)} title="Previous (K)">
-                  <ChevronLeft size={14} />
+                  <ChevronLeft size={15} />
                 </button>
                 <i />
                 <button onClick={() => step(1)} title="Next (J)">
-                  <ChevronRight size={14} />
+                  <ChevronRight size={15} />
                 </button>
               </div>
             </div>
@@ -442,10 +439,7 @@ export default function App() {
                   <b>{sel.from}</b>
                   <small className="mono">{sel.email}</small>
                 </div>
-                <span
-                  className="mono"
-                  style={{ marginLeft: 'auto', fontSize: 11, color: 'var(--label-3)' }}
-                >
+                <span className="mono" style={{ marginLeft: 'auto', fontSize: 11, color: 'var(--label-3)' }}>
                   {sel.stamp}
                 </span>
               </div>
@@ -456,10 +450,7 @@ export default function App() {
                 <button onClick={() => setShowRcpt(!showRcpt)}>
                   <Users size={11} />
                   {sel.to.length - 1 + sel.ccCount} more
-                  <ChevronDown
-                    size={11}
-                    style={{ transform: showRcpt ? 'rotate(180deg)' : 'none' }}
-                  />
+                  <ChevronDown size={11} style={{ transform: showRcpt ? 'rotate(180deg)' : 'none' }} />
                 </button>
               </div>
 
@@ -482,7 +473,7 @@ export default function App() {
                 <div className="att">
                   {sel.attachments.map((a) => (
                     <a key={a.name} href="#" onClick={(e) => e.preventDefault()}>
-                      <Paperclip size={13} color="var(--blue)" />
+                      <Paperclip size={13} style={{ color: 'var(--blue)' }} />
                       <span>
                         <b>{a.name}</b>
                         <small className="mono">{a.size}</small>
@@ -497,7 +488,7 @@ export default function App() {
 
         <section className="pane draft">
           <div className="pane-hd">
-            <CornerUpLeft size={15} color="var(--green)" strokeWidth={1.75} />
+            <CornerUpLeft size={16} style={{ color: 'var(--green)' }} />
             <h2>AI draft reply</h2>
             <div className="menu-wrap" style={{ marginLeft: 'auto' }}>
               <button className="icon-btn" onClick={() => setKebab(!kebab)}>
@@ -569,9 +560,7 @@ export default function App() {
             <div className="card route">
               <div>
                 <span className="eyebrow">Routing tier</span>
-                <b style={{ color: sel.tier === 'Review' ? 'var(--red)' : 'var(--label-1)' }}>
-                  {sel.tier}
-                </b>
+                <b style={{ color: sel.tier === 'Review' ? 'var(--red)' : 'var(--label-1)' }}>{sel.tier}</b>
               </div>
               <div>
                 <span className="eyebrow">Reason</span>
@@ -579,7 +568,7 @@ export default function App() {
               </div>
             </div>
 
-            <div className="card-hd">
+            <div className="card-hd" style={{ marginBottom: 8 }}>
               <span className="eyebrow">Draft</span>
               <div className="lang">
                 {sel.langs.map((l) => (
@@ -687,7 +676,7 @@ export default function App() {
 
       {toast && (
         <div className="toast" role="status">
-          <Check size={14} color="var(--green)" />
+          <Check size={14} style={{ color: 'var(--green)' }} />
           <span>{toast.msg}</span>
           {toast.undo && (
             <button
