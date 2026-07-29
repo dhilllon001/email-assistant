@@ -658,6 +658,12 @@ export default function App() {
                   </span>
                   <span className="addr mono">{sel.email}</span>
                 </div>
+                <div className="to-row subject-row">
+                  <span className="eyebrow" style={{ flex: '0 0 auto' }}>
+                    Subject
+                  </span>
+                  <span className="subject-text">Re: {sel.subject}</span>
+                </div>
                 <textarea
                   ref={editorRef}
                   className="editor"
