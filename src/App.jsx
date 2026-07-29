@@ -56,7 +56,7 @@ function Ring({ value, initials }) {
   )
 }
 
-function Menu({ label, value, options, onPick, active, align }) {
+function Menu({ label, value, options, onPick, active, align, counts }) {
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
 
@@ -69,11 +69,14 @@ function Menu({ label, value, options, onPick, active, align }) {
     return () => document.removeEventListener('mousedown', away)
   }, [open])
 
+  const selectedCount = counts?.[value]
+
   return (
     <div className="menu-wrap" ref={ref}>
       <button className="pill" data-on={active ? '1' : '0'} onClick={() => setOpen(!open)}>
         {label && <span>{label}</span>}
         <b>{value}</b>
+        {selectedCount !== undefined && <span className="pill-count">{selectedCount}</span>}
         <ChevronDown size={12} />
       </button>
       {open && (
@@ -88,7 +91,8 @@ function Menu({ label, value, options, onPick, active, align }) {
               }}
             >
               <Check size={13} style={{ opacity: o === value ? 1 : 0, flex: '0 0 auto' }} />
-              {o}
+              <span className="menu-label">{o}</span>
+              {counts?.[o] !== undefined && <span className="menu-count">{counts[o]}</span>}
             </button>
           ))}
         </div>
@@ -360,17 +364,15 @@ export default function App() {
             </button>
           </div>
 
-          <div className="seg">
-            {['All', 'Pending', 'Edited', 'Approved', 'Manual'].map((t) => (
-              <button key={t} data-on={tab === t ? '1' : '0'} onClick={() => setTab(t)}>
-                {t}
-                <span className="n">{counts[t]}</span>
-              </button>
-            ))}
-          </div>
-
           <div className="filters">
             <Filter size={13} style={{ color: 'var(--label-3)', flex: '0 0 auto' }} />
+            <Menu
+              value={tab}
+              options={['All', 'Pending', 'Edited', 'Approved', 'Manual']}
+              onPick={setTab}
+              active={tab !== 'All'}
+              counts={counts}
+            />
             <Menu value={tier} options={TIERS} onPick={setTier} active={tier !== 'All tiers'} />
             <Menu
               value={intent === 'All intents' ? 'All intents' : intent.split(' ')[0]}
