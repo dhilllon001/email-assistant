@@ -18,7 +18,6 @@ import {
   CornerUpLeft,
   X,
   Users,
-  Filter,
   Command,
   Undo2,
   Zap,
@@ -365,7 +364,6 @@ export default function App() {
           </div>
 
           <div className="filters">
-            <Filter size={13} style={{ color: 'var(--label-3)', flex: '0 0 auto' }} />
             <Menu
               value={tab}
               options={['All', 'Pending', 'Edited', 'Approved', 'Manual']}
@@ -374,12 +372,7 @@ export default function App() {
               counts={counts}
             />
             <Menu value={tier} options={TIERS} onPick={setTier} active={tier !== 'All tiers'} />
-            <Menu
-              value={intent === 'All intents' ? 'All intents' : intent.split(' ')[0]}
-              options={INTENTS}
-              onPick={setIntent}
-              active={intent !== 'All intents'}
-            />
+            <Menu value={intent} options={INTENTS} onPick={setIntent} active={intent !== 'All intents'} />
           </div>
 
           {bulk.length > 1 && (
