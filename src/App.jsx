@@ -99,14 +99,13 @@ function Menu({ label, value, options, onPick, active, align }) {
 
 function useTheme() {
   const [theme, setTheme] = useState(() => {
-    const saved = localStorage.getItem('ca-theme')
-    if (saved === 'light' || saved === 'dark') return saved
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+    const saved = localStorage.getItem('ca-theme-v2')
+    return saved === 'dark' ? 'dark' : 'light'
   })
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
-    localStorage.setItem('ca-theme', theme)
+    localStorage.setItem('ca-theme-v2', theme)
   }, [theme])
 
   return [theme, setTheme]
@@ -159,7 +158,7 @@ export default function App() {
 
   const sel = EMAILS.find((e) => e.id === selId) || list[0] || EMAILS[0]
   const selTone = sel.tones.find((t) => t.id === (tone[sel.id] || sel.tones[0].id)) || sel.tones[0]
-  const selLang = lang[sel.id] || sel.langs[0]
+  const selLang = lang[sel.id] || (sel.langs.includes('EN') ? 'EN' : sel.langs[0])
   const generated = selTone[selLang] || selTone[sel.langs[0]]
   const text = drafts[sel.id] !== undefined ? drafts[sel.id] : generated
   const dirty = drafts[sel.id] !== undefined && drafts[sel.id] !== generated
@@ -568,15 +567,38 @@ export default function App() {
               </div>
             </div>
 
-            <div className="card-hd" style={{ marginBottom: 8 }}>
-              <span className="eyebrow">Draft</span>
-              <div className="lang">
-                {sel.langs.map((l) => (
+            <div className="card draft-block">
+              <div className="card-hd" style={{ marginBottom: 0 }}>
+                <span className="eyebrow">Draft</span>
+                {sel.langs.length > 1 && (
+                  <div className="lang">
+                    {sel.langs.map((l) => (
+                      <button
+                        key={l}
+                        data-on={selLang === l ? '1' : '0'}
+                        onClick={() => {
+                          setLang((s) => ({ ...s, [sel.id]: l }))
+                          setDrafts((d) => {
+                            const n = { ...d }
+                            delete n[sel.id]
+                            return n
+                          })
+                        }}
+                      >
+                        {l}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="tone">
+                {sel.tones.map((t) => (
                   <button
-                    key={l}
-                    data-on={selLang === l ? '1' : '0'}
+                    key={t.id}
+                    data-on={selTone.id === t.id ? '1' : '0'}
                     onClick={() => {
-                      setLang((s) => ({ ...s, [sel.id]: l }))
+                      setTone((s) => ({ ...s, [sel.id]: t.id }))
                       setDrafts((d) => {
                         const n = { ...d }
                         delete n[sel.id]
@@ -584,61 +606,43 @@ export default function App() {
                       })
                     }}
                   >
-                    {l}
+                    {t.label}
                   </button>
                 ))}
               </div>
-            </div>
 
-            <div className="tone">
-              {sel.tones.map((t) => (
-                <button
-                  key={t.id}
-                  data-on={selTone.id === t.id ? '1' : '0'}
-                  onClick={() => {
-                    setTone((s) => ({ ...s, [sel.id]: t.id }))
-                    setDrafts((d) => {
-                      const n = { ...d }
-                      delete n[sel.id]
-                      return n
-                    })
-                  }}
-                >
-                  {t.label}
-                </button>
-              ))}
-            </div>
-
-            <div className="to-row">
-              <span className="eyebrow" style={{ flex: '0 0 auto' }}>
-                To
-              </span>
-              <span className="addr mono">{sel.email}</span>
-            </div>
-            <textarea
-              ref={editorRef}
-              className="editor"
-              value={text}
-              onChange={(e) => onEdit(e.target.value)}
-              spellCheck={false}
-            />
-
-            <div className="editor-foot">
-              <button className="insert mono" onClick={() => onEdit(`${text} ${sel.po}`)}>
-                + {sel.po}
-              </button>
-              <button className="insert mono" onClick={() => onEdit(`${text} ${sel.ref}`)}>
-                + {sel.ref}
-              </button>
-              <button className="insert mono" onClick={() => onEdit(`${text} ETA 30/JUL 14:00`)}>
-                + ETA
-              </button>
-              {dirty && (
-                <span className="dirty">
-                  <Pencil size={10} />
-                  Edited from AI draft
-                </span>
-              )}
+              <div className="composer">
+                <div className="to-row">
+                  <span className="eyebrow" style={{ flex: '0 0 auto' }}>
+                    To
+                  </span>
+                  <span className="addr mono">{sel.email}</span>
+                </div>
+                <textarea
+                  ref={editorRef}
+                  className="editor"
+                  value={text}
+                  onChange={(e) => onEdit(e.target.value)}
+                  spellCheck={false}
+                />
+                <div className="editor-foot">
+                  <button className="insert mono" onClick={() => onEdit(`${text} ${sel.po}`)}>
+                    + {sel.po}
+                  </button>
+                  <button className="insert mono" onClick={() => onEdit(`${text} ${sel.ref}`)}>
+                    + {sel.ref}
+                  </button>
+                  <button className="insert mono" onClick={() => onEdit(`${text} ETA 30/JUL 14:00`)}>
+                    + ETA
+                  </button>
+                  {dirty && (
+                    <span className="dirty">
+                      <Pencil size={10} />
+                      Edited from AI draft
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
 

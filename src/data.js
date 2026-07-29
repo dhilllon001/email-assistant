@@ -32,7 +32,7 @@ export const EMAILS = [
       { name: 'BOL_413714520.pdf', size: '248 KB' },
       { name: 'Packing_List_11800VL.pdf', size: '96 KB' },
     ],
-    langs: ['ES', 'EN'],
+    langs: ['EN', 'ES'],
     tones: [
       {
         id: 'ack',
@@ -79,7 +79,7 @@ export const EMAILS = [
     ],
     ccCount: 21,
     attachments: [{ name: 'BOL_413714519.pdf', size: '233 KB' }],
-    langs: ['ES', 'EN'],
+    langs: ['EN', 'ES'],
     tones: [
       {
         id: 'ack',
@@ -119,7 +119,7 @@ export const EMAILS = [
     ],
     ccCount: 18,
     attachments: [{ name: 'BOL_413714526.pdf', size: '251 KB' }],
-    langs: ['ES', 'EN'],
+    langs: ['EN', 'ES'],
     tones: [
       {
         id: 'ack',
@@ -143,7 +143,7 @@ export const EMAILS = [
     time: '11:47 AM',
     stamp: 'Jul 28, 2026 at 11:47:12 AM',
     confidence: 62,
-    subject: '回复: EXT: Re: Top Urgent Reconstruction Of June Customs Data — Need to update',
+    subject: 'Re: EXT: Top Urgent Reconstruction Of June Customs Data — Need to update',
     po: 'June 2026',
     ref: 'ACE/ACI',
     lane: 'Customs — cross-border filings',
@@ -152,7 +152,7 @@ export const EMAILS = [
     sub: 'Multi-intent · needs review',
     tier: 'Review',
     reason: 'Low confidence · multi-intent',
-    body: 'Hello team,\n\n请尽快更新六月的报关数据。We found mismatches on 14 entries between the manifest and the ACE filing for June. Please advise which reference is authoritative and confirm when the corrected set will be resubmitted.\n\nAlso, who is the new contact after Andrea\'s handover?\n\nThanks,\nYumei',
+    body: 'Hello team,\n\nPlease update the June customs filing data as soon as possible. We found mismatches on 14 entries between the manifest and the ACE filing for June. Please advise which reference is authoritative and confirm when the corrected set will be resubmitted.\n\nAlso, who is the new contact after Andrea\'s handover?\n\nThanks,\nYumei',
     to: [
       'brenda.munguia@chargergloballogistics.com',
       'customs@chargerlogistics.com',
@@ -160,19 +160,17 @@ export const EMAILS = [
     ],
     ccCount: 9,
     attachments: [{ name: 'June_Entry_Variance.xlsx', size: '1.2 MB' }],
-    langs: ['EN', 'ZH'],
+    langs: ['EN'],
     tones: [
       {
         id: 'hold',
         label: 'Acknowledge + escalate',
         EN: 'Hi Yumei,\n\nThanks for flagging this. We\'re reviewing the 14 variances in your file against our June ACE submissions now.\n\nOur customs lead will come back to you by end of day tomorrow with the authoritative reference and a resubmission date. Brenda Munguia is your contact following Andrea\'s handover.\n\nRegards,\nCharger Logistics | Customs',
-        ZH: '您好 Yumei，\n\n感谢您的提醒。我们正在核对您文件中的 14 项差异与六月 ACE 申报数据。\n\n我们的报关负责人将于明日下班前答复，确认以哪份数据为准以及重新申报的时间。Andrea 交接后，请与 Brenda Munguia 联系。\n\n此致，\nCharger Logistics | 报关部',
       },
       {
         id: 'ask',
         label: 'Request specifics',
         EN: 'Hi Yumei,\n\nBefore we correct the June set, could you confirm which 14 entry numbers are affected and whether the variance is on quantity, value, or HS classification?\n\nThat lets us amend in one filing rather than several.\n\nRegards,\nCharger Logistics | Customs',
-        ZH: '您好 Yumei，\n\n在修正六月数据之前，请确认受影响的 14 个报关单号，以及差异属于数量、金额还是 HS 编码。\n\n这样我们可以一次性完成修正申报。\n\n此致，\nCharger Logistics | 报关部',
       },
     ],
   },
@@ -200,7 +198,7 @@ export const EMAILS = [
     ],
     ccCount: 20,
     attachments: [{ name: 'BOL_6000445241.pdf', size: '219 KB' }],
-    langs: ['ES', 'EN'],
+    langs: ['EN', 'ES'],
     tones: [
       {
         id: 'ack',
@@ -234,7 +232,7 @@ export const EMAILS = [
     ],
     ccCount: 20,
     attachments: [{ name: 'BOL_6000445214.pdf', size: '204 KB' }],
-    langs: ['ES', 'EN'],
+    langs: ['EN', 'ES'],
     tones: [
       {
         id: 'ack',
