@@ -380,43 +380,55 @@ button {
 /* ── Segmented control ── */
 .seg {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 4px;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 6px;
   margin: 12px 12px 0;
   padding: 0;
-  border-radius: 0;
   background: transparent;
   border: none;
 }
 
 .seg button {
-  height: 34px;
-  display: flex;
+  grid-column: span 2;
+  height: 32px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
-  border-radius: 9px;
+  gap: 6px;
+  border-radius: 8px;
   font-size: 12px;
   font-weight: 600;
-  color: var(--label-2);
-  background: var(--bg-fill);
+  color: var(--label-1);
+  background: #ffffff;
   border: 1px solid var(--separator);
+  box-shadow: var(--shadow-sm);
   transition: background 0.16s ease, color 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
   white-space: nowrap;
   min-width: 0;
-  padding: 0 6px;
+  padding: 0 8px;
+  overflow: hidden;
+}
+
+.seg button:nth-child(4),
+.seg button:nth-child(5) {
+  grid-column: span 3;
 }
 
 .seg button:hover {
-  color: var(--label-1);
-  background: var(--bg-fill-strong);
+  background: var(--bg-fill);
+  border-color: var(--separator-opaque);
 }
 
 .seg button[data-on='1'] {
   background: var(--label-1);
   color: #ffffff;
   border-color: var(--label-1);
-  box-shadow: var(--shadow-sm);
+  box-shadow: none;
+}
+
+[data-theme='dark'] .seg button {
+  background: var(--bg-fill);
+  color: var(--label-1);
 }
 
 [data-theme='dark'] .seg button[data-on='1'] {
@@ -426,23 +438,30 @@ button {
 }
 
 .seg .n {
+  flex: 0 0 auto;
   font-size: 11px;
   font-variant-numeric: tabular-nums;
   font-weight: 700;
-  padding: 1px 5px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
   border-radius: 999px;
-  background: rgba(0, 0, 0, 0.08);
-  color: inherit;
-  opacity: 0.85;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-fill-strong);
+  color: var(--label-2);
+  line-height: 1;
 }
 
 .seg button[data-on='1'] .n {
   background: rgba(255, 255, 255, 0.2);
-  color: inherit;
+  color: #ffffff;
 }
 
 [data-theme='dark'] .seg button[data-on='1'] .n {
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(0, 0, 0, 0.12);
+  color: #111111;
 }
 
 /* ── Filters ── */
@@ -1641,12 +1660,5 @@ button {
   }
   .body {
     padding: 8px;
-  }
-  .seg {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-  .seg button:nth-child(4),
-  .seg button:nth-child(5) {
-    grid-column: span 1;
   }
 }
