@@ -97,6 +97,64 @@ function Menu({ label, value, options, onPick, active, align }) {
   )
 }
 
+function AttachmentLine({ files, onOpen }) {
+  if (!files?.length) return null
+  return (
+    <div className="att-line">
+      <Paperclip size={13} className="att-line-icon" aria-hidden="true" />
+      <span className="att-line-label">Attachments:</span>
+      {files.map((a, i) => (
+        <span key={a.name} className="att-line-item">
+          {i > 0 && <span className="att-line-sep">·</span>}
+          <button
+            type="button"
+            className="att-link"
+            onClick={() => onOpen(a)}
+            title={`${a.name} (${a.size})`}
+          >
+            {a.name}
+          </button>
+        </span>
+      ))}
+    </div>
+  )
+}
+
+function AttachmentPopup({ file, onClose }) {
+  if (!file) return null
+  return (
+    <div className="att-overlay" onClick={onClose} role="presentation">
+      <div
+        className="att-popup"
+        role="dialog"
+        aria-modal="true"
+        aria-label={file.name}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="att-popup-hd">
+          <Paperclip size={16} />
+          <div>
+            <b>{file.name}</b>
+            <small className="mono">{file.size}</small>
+          </div>
+          <button type="button" className="icon-btn" onClick={onClose} aria-label="Close">
+            <X size={15} />
+          </button>
+        </div>
+        <p className="att-popup-note">Preview this attachment, or download a copy to your computer.</p>
+        <div className="att-popup-actions">
+          <button type="button" className="ghost" onClick={onClose}>
+            Close
+          </button>
+          <button type="button" className="primary att-download" onClick={onClose}>
+            Download
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function useTheme() {
   const [theme, setTheme] = useState(() => {
     const saved = localStorage.getItem('ca-theme-v2')
@@ -125,6 +183,7 @@ export default function App() {
   const [showRcpt, setShowRcpt] = useState(false)
   const [kebab, setKebab] = useState(false)
   const [toast, setToast] = useState(null)
+  const [openFile, setOpenFile] = useState(null)
   const editorRef = useRef(null)
 
   const counts = useMemo(
@@ -210,6 +269,15 @@ export default function App() {
       setStatus((s) => (s[sel.id] === 'approved' ? s : { ...s, [sel.id]: 'edited' }))
     }
   }
+
+  useEffect(() => {
+    if (!openFile) return
+    const onKey = (e) => {
+      if (e.key === 'Escape') setOpenFile(null)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [openFile])
 
   useEffect(() => {
     const key = (e) => {
@@ -354,6 +422,7 @@ export default function App() {
                     onClick={() => {
                       setSelId(e.id)
                       setShowRcpt(false)
+                      setOpenFile(null)
                     }}
                   >
                     <Ring value={e.confidence} initials={e.initials} />
@@ -375,9 +444,9 @@ export default function App() {
                           <span className="tag mute">{e.sub.split(' / ')[0]}</span>
                         )}
                         {e.attachments.length > 0 && (
-                          <span className="chip att">
+                          <span className="att-inline mono" title={e.attachments.map((a) => a.name).join(', ')}>
                             <Paperclip size={11} />
-                            {e.attachments.length} file{e.attachments.length > 1 ? 's' : ''}
+                            {e.attachments.length}
                           </span>
                         )}
                       </div>
@@ -469,29 +538,11 @@ export default function App() {
               <div className="msg-highlights">
                 <span className="chip po mono">{sel.po}</span>
                 <span className="chip ref mono">{sel.ref}</span>
-                {sel.attachments.length > 0 && (
-                  <span className="chip att">
-                    <Paperclip size={11} />
-                    {sel.attachments.length} attachment{sel.attachments.length > 1 ? 's' : ''}
-                  </span>
-                )}
               </div>
 
               <div className="msg-body">{sel.body}</div>
 
-              {sel.attachments.length > 0 && (
-                <div className="att">
-                  {sel.attachments.map((a) => (
-                    <a key={a.name} href="#" onClick={(e) => e.preventDefault()}>
-                      <Paperclip size={15} style={{ color: 'var(--att-fg)', flex: '0 0 auto' }} />
-                      <span>
-                        <b>{a.name}</b>
-                        <small className="mono">{a.size}</small>
-                      </span>
-                    </a>
-                  ))}
-                </div>
-              )}
+              <AttachmentLine files={sel.attachments} onOpen={setOpenFile} />
             </article>
           </div>
         </section>
@@ -708,6 +759,8 @@ export default function App() {
           </button>
         </div>
       )}
+
+      <AttachmentPopup file={openFile} onClose={() => setOpenFile(null)} />
     </div>
   )
 }
