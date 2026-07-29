@@ -101,21 +101,22 @@ function AttachmentLine({ files, onOpen }) {
   if (!files?.length) return null
   return (
     <div className="att-line">
-      <Paperclip size={13} className="att-line-icon" aria-hidden="true" />
-      <span className="att-line-label">Attachments:</span>
-      {files.map((a, i) => (
-        <span key={a.name} className="att-line-item">
-          {i > 0 && <span className="att-line-sep">·</span>}
-          <button
-            type="button"
-            className="att-link"
-            onClick={() => onOpen(a)}
-            title={`${a.name} (${a.size})`}
-          >
-            {a.name}
-          </button>
-        </span>
-      ))}
+      <span className="att-line-label">Attachments</span>
+      <div className="att-line-links">
+        {files.map((a, i) => (
+          <span key={a.name} className="att-line-item">
+            {i > 0 && <span className="att-line-sep">·</span>}
+            <button
+              type="button"
+              className="att-link"
+              onClick={() => onOpen(a)}
+              title={`${a.name} (${a.size})`}
+            >
+              {a.name}
+            </button>
+          </span>
+        ))}
+      </div>
     </div>
   )
 }
@@ -318,11 +319,7 @@ export default function App() {
     <div className="app">
       <header className="topbar">
         <div className="brand">
-          <div className="brand-mark">C</div>
-          <div className="brand-text">
-            <strong>Charger AI</strong>
-            <span>Email Assistant</span>
-          </div>
+          <strong className="brand-title">Email Assistant</strong>
         </div>
 
         <label className="search">
@@ -336,10 +333,6 @@ export default function App() {
         </label>
 
         <div className="top-right">
-          <div className="pending-chip">
-            <b>{counts.Pending}</b>
-            <span>pending review</span>
-          </div>
           <button
             className="theme-toggle"
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
@@ -348,10 +341,9 @@ export default function App() {
           >
             {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
           </button>
-          <div className="user">
-            <div className="user-ava">AS</div>
-            <span>arshdeep.singh@chargerlogistics.com</span>
-          </div>
+          <button className="user-ava" type="button" title="arshdeep.singh@chargerlogistics.com" aria-label="Account">
+            AS
+          </button>
         </div>
       </header>
 
@@ -507,9 +499,10 @@ export default function App() {
                   <b>{sel.from}</b>
                   <small className="mono">{sel.email}</small>
                 </div>
-                <span className="mono" style={{ marginLeft: 'auto', fontSize: 11, color: 'var(--label-3)' }}>
-                  {sel.stamp}
-                </span>
+                <div className="msg-hd-right">
+                  <AttachmentLine files={sel.attachments} onOpen={setOpenFile} />
+                  <span className="mono msg-stamp">{sel.stamp}</span>
+                </div>
               </div>
 
               <div className="rcpt">
@@ -541,8 +534,6 @@ export default function App() {
               </div>
 
               <div className="msg-body">{sel.body}</div>
-
-              <AttachmentLine files={sel.attachments} onOpen={setOpenFile} />
             </article>
           </div>
         </section>
