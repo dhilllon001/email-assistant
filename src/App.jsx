@@ -573,20 +573,27 @@ export default function App() {
             <div className="card">
               <div className="card-hd">
                 <span className="eyebrow">Classification</span>
-                <button className="pill" style={{ height: 24 }}>
-                  <Pencil size={11} />
+                <button type="button" className="link-btn">
+                  <Pencil size={12} />
                   Change
                 </button>
               </div>
-              <div className="kv">
-                <span className="tag mute">{sel.dept}</span>
-                <span className="tag">{sel.intent}</span>
-                <span className={`tag ${sel.confidence < 80 ? 'hold' : 'mute'}`}>{sel.sub}</span>
+              <div className="meta-grid">
+                <div className="meta-row">
+                  <span className="meta-key">Department</span>
+                  <span className="meta-val">{sel.dept}</span>
+                </div>
+                <div className="meta-row">
+                  <span className="meta-key">Intent</span>
+                  <span className="meta-val">{sel.intent}</span>
+                </div>
+                <div className="meta-row">
+                  <span className="meta-key">Subtype</span>
+                  <span className="meta-val">{sel.sub}</span>
+                </div>
               </div>
               <div className="conf">
-                <span className="eyebrow" style={{ flex: '0 0 auto' }}>
-                  Confidence
-                </span>
+                <span className="meta-key">Confidence</span>
                 <div className="bar">
                   <i style={{ width: `${sel.confidence}%`, background: confTone }} />
                 </div>
@@ -596,13 +603,13 @@ export default function App() {
               </div>
             </div>
 
-            <div className="card route">
+            <div className="route">
               <div>
-                <span className="eyebrow">Routing tier</span>
+                <span className="meta-key">Routing tier</span>
                 <b style={{ color: sel.tier === 'Review' ? 'var(--red)' : 'var(--label-1)' }}>{sel.tier}</b>
               </div>
               <div>
-                <span className="eyebrow">Reason</span>
+                <span className="meta-key">Reason</span>
                 <b>{sel.reason}</b>
               </div>
             </div>
@@ -615,6 +622,7 @@ export default function App() {
                     {sel.langs.map((l) => (
                       <button
                         key={l}
+                        type="button"
                         data-on={selLang === l ? '1' : '0'}
                         onClick={() => {
                           setLang((s) => ({ ...s, [sel.id]: l }))
@@ -636,6 +644,7 @@ export default function App() {
                 {sel.tones.map((t) => (
                   <button
                     key={t.id}
+                    type="button"
                     data-on={selTone.id === t.id ? '1' : '0'}
                     onClick={() => {
                       setTone((s) => ({ ...s, [sel.id]: t.id }))
@@ -652,17 +661,13 @@ export default function App() {
               </div>
 
               <div className="composer">
-                <div className="to-row">
-                  <span className="eyebrow" style={{ flex: '0 0 auto' }}>
-                    To
-                  </span>
-                  <span className="addr mono">{sel.email}</span>
+                <div className="compose-row">
+                  <span className="compose-label">To</span>
+                  <span className="compose-value mono">{sel.email}</span>
                 </div>
-                <div className="to-row subject-row">
-                  <span className="eyebrow" style={{ flex: '0 0 auto' }}>
-                    Subject
-                  </span>
-                  <span className="subject-text">Re: {sel.subject}</span>
+                <div className="compose-row">
+                  <span className="compose-label">Subject</span>
+                  <span className="compose-value">Re: {sel.subject}</span>
                 </div>
                 <textarea
                   ref={editorRef}
@@ -672,13 +677,13 @@ export default function App() {
                   spellCheck={false}
                 />
                 <div className="editor-foot">
-                  <button className="insert mono" onClick={() => onEdit(`${text} ${sel.po}`)}>
+                  <button type="button" className="insert mono" onClick={() => onEdit(`${text} ${sel.po}`)}>
                     + {sel.po}
                   </button>
-                  <button className="insert mono" onClick={() => onEdit(`${text} ${sel.ref}`)}>
+                  <button type="button" className="insert mono" onClick={() => onEdit(`${text} ${sel.ref}`)}>
                     + {sel.ref}
                   </button>
-                  <button className="insert mono" onClick={() => onEdit(`${text} ETA 30/JUL 14:00`)}>
+                  <button type="button" className="insert mono" onClick={() => onEdit(`${text} ETA 30/JUL 14:00`)}>
                     + ETA
                   </button>
                   {dirty && (
