@@ -364,7 +364,7 @@ export default function App() {
                       </div>
                       <p className="row-subj">{e.subject}</p>
                       <div className="row-meta">
-                        <span className="chip mono">{e.po}</span>
+                        <span className="chip po mono">{e.po}</span>
                         {st === 'approved' ? (
                           <span className="tag go">Sent</span>
                         ) : st === 'edited' ? (
@@ -375,9 +375,9 @@ export default function App() {
                           <span className="tag mute">{e.sub.split(' / ')[0]}</span>
                         )}
                         {e.attachments.length > 0 && (
-                          <span className="chip" style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
-                            <Paperclip size={10} />
-                            {e.attachments.length}
+                          <span className="chip att">
+                            <Paperclip size={11} />
+                            {e.attachments.length} file{e.attachments.length > 1 ? 's' : ''}
                           </span>
                         )}
                       </div>
@@ -409,10 +409,10 @@ export default function App() {
           <div className="thread-hd">
             <h1>{sel.subject}</h1>
             <div className="thread-meta">
-              <span className="chip mono">{sel.po}</span>
-              <span className="chip mono">{sel.ref}</span>
-              <span style={{ fontSize: 12, color: 'var(--label-2)' }}>{sel.lane}</span>
-              <span style={{ fontSize: 12, color: 'var(--label-3)' }}>· 1 message</span>
+              <span className="chip po mono">{sel.po}</span>
+              <span className="chip ref mono">{sel.ref}</span>
+              <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--label-2)' }}>{sel.lane}</span>
+              <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--label-3)' }}>· 1 message</span>
               <div className="nav">
                 <button onClick={() => step(-1)} title="Previous (K)">
                   <ChevronLeft size={15} />
@@ -466,13 +466,24 @@ export default function App() {
                 </div>
               )}
 
+              <div className="msg-highlights">
+                <span className="chip po mono">{sel.po}</span>
+                <span className="chip ref mono">{sel.ref}</span>
+                {sel.attachments.length > 0 && (
+                  <span className="chip att">
+                    <Paperclip size={11} />
+                    {sel.attachments.length} attachment{sel.attachments.length > 1 ? 's' : ''}
+                  </span>
+                )}
+              </div>
+
               <div className="msg-body">{sel.body}</div>
 
               {sel.attachments.length > 0 && (
                 <div className="att">
                   {sel.attachments.map((a) => (
                     <a key={a.name} href="#" onClick={(e) => e.preventDefault()}>
-                      <Paperclip size={13} style={{ color: 'var(--blue)' }} />
+                      <Paperclip size={15} style={{ color: 'var(--att-fg)', flex: '0 0 auto' }} />
                       <span>
                         <b>{a.name}</b>
                         <small className="mono">{a.size}</small>
@@ -661,13 +672,11 @@ export default function App() {
               <Undo2 size={13} />
               Revert
             </button>
-            <button className="ghost" onClick={() => flash('Comment thread opened')}>
-              <MessageSquarePlus size={13} />
-              Comment
+            <button className="ghost ghost-icon" onClick={() => flash('Comment thread opened')} title="Comment">
+              <MessageSquarePlus size={14} />
             </button>
-            <button className="ghost" onClick={() => flash('Copied to clipboard')}>
-              <Copy size={13} />
-              Copy
+            <button className="ghost ghost-icon" onClick={() => flash('Copied to clipboard')} title="Copy">
+              <Copy size={14} />
             </button>
             <button className="primary" onClick={() => approve()}>
               <Check size={15} />
