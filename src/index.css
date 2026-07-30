@@ -469,29 +469,31 @@ button {
 /* ── Filters ── */
 .filters {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: stretch;
-  gap: 8px;
-  padding: 12px;
+  gap: 6px;
+  padding: 10px 12px 8px;
 }
 
 .menu-wrap {
   position: relative;
-  width: 100%;
+  flex: 1 1 0;
+  min-width: 0;
+  width: auto;
 }
 
 .pill {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   width: auto;
-  height: 34px;
-  padding: 0 12px;
+  height: 32px;
+  padding: 0 8px;
   border-radius: 8px;
   background: #ffffff;
   border: 1px solid var(--separator);
   box-shadow: var(--shadow-sm);
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 500;
   color: var(--label-1);
   transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
@@ -499,6 +501,7 @@ button {
 
 .filters .pill {
   width: 100%;
+  min-width: 0;
 }
 
 .pill:hover {
@@ -513,19 +516,23 @@ button {
 }
 
 .pill b {
+  flex: 1 1 auto;
+  min-width: 0;
   font-weight: 700;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  text-align: left;
 }
 
 .pill .pill-count {
-  margin-left: auto;
+  margin-left: 0;
+  flex: 0 0 auto;
 }
 
 .pill svg:last-child {
   flex: 0 0 auto;
-  margin-left: 2px;
+  margin-left: 0;
   color: var(--label-3);
 }
 
@@ -562,9 +569,9 @@ button {
   top: calc(100% + 6px);
   left: 0;
   z-index: 50;
-  min-width: 100%;
+  min-width: max(100%, 200px);
   width: max-content;
-  max-width: 340px;
+  max-width: 280px;
   padding: 6px;
   border-radius: 12px;
   border: 1px solid var(--separator);

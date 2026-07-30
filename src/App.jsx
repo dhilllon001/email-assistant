@@ -54,7 +54,7 @@ function Ring({ value, initials }) {
   )
 }
 
-function Menu({ label, value, options, onPick, active, align, counts }) {
+function Menu({ label, value, displayValue, options, onPick, active, align, counts }) {
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
 
@@ -68,12 +68,13 @@ function Menu({ label, value, options, onPick, active, align, counts }) {
   }, [open])
 
   const selectedCount = counts?.[value]
+  const shown = displayValue || value
 
   return (
     <div className="menu-wrap" ref={ref}>
       <button className="pill" data-on={active ? '1' : '0'} onClick={() => setOpen(!open)}>
         {label && <span>{label}</span>}
-        <b>{value}</b>
+        <b>{shown}</b>
         {selectedCount !== undefined && <span className="pill-count">{selectedCount}</span>}
         <ChevronDown size={12} />
       </button>
@@ -346,8 +347,20 @@ export default function App() {
               active={tab !== 'All'}
               counts={counts}
             />
-            <Menu value={tier} options={TIERS} onPick={setTier} active={tier !== 'All tiers'} />
-            <Menu value={intent} options={INTENTS} onPick={setIntent} active={intent !== 'All intents'} />
+            <Menu
+              value={tier}
+              displayValue={tier === 'All tiers' ? 'Tiers' : tier}
+              options={TIERS}
+              onPick={setTier}
+              active={tier !== 'All tiers'}
+            />
+            <Menu
+              value={intent}
+              displayValue={intent === 'All intents' ? 'Intents' : intent.split(' ')[0]}
+              options={INTENTS}
+              onPick={setIntent}
+              active={intent !== 'All intents'}
+            />
           </div>
 
           {bulk.length > 1 && (
