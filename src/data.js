@@ -1,5 +1,63 @@
 export const EMAILS = [
   {
+    id: 'e0',
+    from: 'Doris Li',
+    email: 'doris.li@hisense.com',
+    initials: 'DL',
+    time: '10:14 AM',
+    stamp: 'Jul 30, 2026 at 10:14:22 AM',
+    confidence: 32,
+    subject: 'Inbound Delivery(Monterrey->Pantos TX, Charger, G170, 7/30)',
+    po: 'G170',
+    ref: '7/30',
+    lane: 'Monterrey → Pantos, TX',
+    dept: 'CSR / Dispatch',
+    intent: 'Shipment status update',
+    sub: 'Multi-stop inbound · needs review',
+    tier: 'Escalation',
+    reason: 'Critic unsatisfied',
+    body: 'Dear Team,\n\nPlease find below the inbound delivery details for Monterrey → Pantos TX (Charger, G170, 7/30).\n\nKindly confirm receipt of each unit and advise on offload / delivery appointments.\n\nThanks,\nDoris Li\nHisense Logistics',
+    to: [
+      'brenda.munguia@chargergloballogistics.com',
+      'Hisense@chargerlogistics.com',
+      'ryan@chargerlogistics.com',
+      'dispatch@chargerlogistics.com',
+    ],
+    ccCount: 14,
+    attachments: [{ name: 'Inbound_G170_0730.xlsx', size: '186 KB' }],
+    table: {
+      headers: [
+        'Issuing Date',
+        'PO Number',
+        'Customer Model',
+        'Trailer Number',
+        'Sum of Issuing Quantity',
+        'Carrier',
+      ],
+      rows: [
+        ['7/28/2026', '6000445891', '75U8K', 'CFT-4412', '42', 'Charger'],
+        ['7/28/2026', '6000445892', '65U8K', 'CFT-4412', '38', 'Charger'],
+        ['7/29/2026', '6000445910', '55U7N', 'CFT-4488', '60', 'Charger'],
+        ['7/29/2026', '6000445911', '50U6H', 'CFT-4488', '54', 'Charger'],
+        ['7/30/2026', '6000445933', '43A6H', 'CFT-4501', '72', 'Charger'],
+        ['7/30/2026', '6000445934', '32A4H', 'CFT-4501', '80', 'Charger'],
+      ],
+    },
+    langs: ['EN'],
+    tones: [
+      {
+        id: 'status',
+        label: 'Status update',
+        EN: 'Hi Doris,\n\nThanks for the inbound delivery notice for Monterrey → Pantos TX (Charger, G170, 7/30).\n\nDelivery Status Updates\n• Units on trailers CFT-4412, CFT-4488, and CFT-4501 are in transit to Pantos, TX.\n• Border crossing is planned for today; we will confirm once each unit clears.\n\nOffload Information\n• Receiving dock: Pantos TX FG\n• Please hold the appointment window until we send the final ETA after crossing.\n\nConfirmed Delivery Appointments\n• We will reply with appointment numbers for each trailer as soon as Pantos assigns them.\n\nRegards,\nCharger Logistics | CSR Team',
+      },
+      {
+        id: 'escalate',
+        label: 'Escalate + clarify',
+        EN: 'Hi Doris,\n\nWe received the G170 inbound list for Pantos TX. Before we confirm appointments, we need clarification on two points:\n\n1) Which POs on CFT-4488 are priority for first unload?\n2) Is the quantity on PO 6000445933 final, or should we expect a revised issuing quantity?\n\nOnce confirmed, our dispatch lead will lock appointments and send them back today.\n\nRegards,\nCharger Logistics | CSR Team',
+      },
+    ],
+  },
+  {
     id: 'e1',
     from: 'Tania Gonzalez',
     email: 'tania.gonzalez@hisense.com',
@@ -244,7 +302,7 @@ export const EMAILS = [
   },
 ]
 
-export const TIERS = ['All tiers', 'Draft', 'Review', 'Manual']
+export const TIERS = ['All tiers', 'Draft', 'Review', 'Escalation', 'Manual']
 export const INTENTS = [
   'All intents',
   'Shipment status update',

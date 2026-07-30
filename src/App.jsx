@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   Inbox,
   Search,
-  RefreshCw,
   ChevronDown,
   ChevronRight,
   ChevronLeft,
@@ -54,49 +53,12 @@ function Ring({ value, initials }) {
   )
 }
 
-function Menu({ label, value, displayValue, options, onPick, active, align, counts }) {
-  const [open, setOpen] = useState(false)
-  const ref = useRef(null)
-
-  useEffect(() => {
-    if (!open) return
-    const away = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) setOpen(false)
-    }
-    document.addEventListener('mousedown', away)
-    return () => document.removeEventListener('mousedown', away)
-  }, [open])
-
-  const selectedCount = counts?.[value]
-  const shown = displayValue || value
-
+function TabBtn({ label, count, active, onClick }) {
   return (
-    <div className="menu-wrap" ref={ref}>
-      <button className="pill" data-on={active ? '1' : '0'} onClick={() => setOpen(!open)}>
-        {label && <span>{label}</span>}
-        <b>{shown}</b>
-        {selectedCount !== undefined && <span className="pill-count">{selectedCount}</span>}
-        <ChevronDown size={12} />
-      </button>
-      {open && (
-        <div className={`menu${align === 'right' ? ' right' : ''}`}>
-          {options.map((o) => (
-            <button
-              key={o}
-              data-on={o === value ? '1' : '0'}
-              onClick={() => {
-                onPick(o)
-                setOpen(false)
-              }}
-            >
-              <Check size={13} style={{ opacity: o === value ? 1 : 0, flex: '0 0 auto' }} />
-              <span className="menu-label">{o}</span>
-              {counts?.[o] !== undefined && <span className="menu-count">{counts[o]}</span>}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
+    <button type="button" className="ftab" data-on={active ? '1' : '0'} onClick={onClick}>
+      <span className="ftab-label">{label}</span>
+      {count !== undefined && <span className="ftab-count mono">{count}</span>}
+    </button>
   )
 }
 
@@ -151,10 +113,10 @@ function useTheme() {
 
 export default function App() {
   const [theme, setTheme] = useTheme()
-  const [selId, setSelId] = useState('e1')
-  const [tab, setTab] = useState('Pending')
-  const [tier, setTier] = useState('All tiers')
-  const [intent, setIntent] = useState('All intents')
+  const [selId, setSelId] = useState('e0')
+  const [tab, setTab] = useState('')
+  const [tier, setTier] = useState('')
+  const [intent, setIntent] = useState('')
   const [query, setQuery] = useState('')
   const [status, setStatus] = useState({})
   const [drafts, setDrafts] = useState({})
@@ -166,16 +128,35 @@ export default function App() {
   const [openFile, setOpenFile] = useState(null)
   const editorRef = useRef(null)
 
+  const statusTabs = ['Pending', 'Edited', 'Approved', 'Manual']
+
   const counts = useMemo(
     () => ({
-      All: EMAILS.length,
       Pending: EMAILS.filter((e) => !status[e.id]).length,
       Edited: EMAILS.filter((e) => status[e.id] === 'edited').length,
       Approved: EMAILS.filter((e) => status[e.id] === 'approved').length,
-      Manual: EMAILS.filter((e) => e.tier === 'Review').length,
+      Manual: EMAILS.filter((e) => e.tier === 'Review' || e.tier === 'Escalation').length,
     }),
     [status],
   )
+
+  const tierTabs = useMemo(
+    () =>
+      TIERS.slice(1)
+        .map((t) => ({ key: t, count: EMAILS.filter((e) => e.tier === t).length }))
+        .filter((t) => t.count > 0),
+    [],
+  )
+
+  const intentTabs = useMemo(
+    () =>
+      INTENTS.slice(1)
+        .map((i) => ({ key: i, count: EMAILS.filter((e) => e.intent === i).length }))
+        .filter((i) => i.count > 0),
+    [],
+  )
+
+  const visibleStatusTabs = statusTabs.filter((s) => counts[s] > 0)
 
   const list = useMemo(
     () =>
@@ -183,9 +164,9 @@ export default function App() {
         if (tab === 'Pending' && status[e.id]) return false
         if (tab === 'Edited' && status[e.id] !== 'edited') return false
         if (tab === 'Approved' && status[e.id] !== 'approved') return false
-        if (tab === 'Manual' && e.tier !== 'Review') return false
-        if (tier !== 'All tiers' && e.tier !== tier) return false
-        if (intent !== 'All intents' && e.intent !== intent) return false
+        if (tab === 'Manual' && e.tier !== 'Review' && e.tier !== 'Escalation') return false
+        if (tier && e.tier !== tier) return false
+        if (intent && e.intent !== intent) return false
         if (query) {
           const hay = `${e.subject} ${e.from} ${e.po} ${e.ref}`.toLowerCase()
           if (!hay.includes(query.toLowerCase())) return false
@@ -194,6 +175,10 @@ export default function App() {
       }),
     [tab, tier, intent, query, status],
   )
+
+  const pickTab = (value, current, setter) => {
+    setter(current === value ? '' : value)
+  }
 
   const sel = EMAILS.find((e) => e.id === selId) || list[0] || EMAILS[0]
   const selTone = sel.tones.find((t) => t.id === (tone[sel.id] || sel.tones[0].id)) || sel.tones[0]
@@ -269,7 +254,7 @@ export default function App() {
       }
       if (!typing && e.key === '/') {
         e.preventDefault()
-        document.querySelector('.search input')?.focus()
+        document.querySelector('.queue-search input')?.focus()
         return
       }
       if (typing) return
@@ -301,16 +286,6 @@ export default function App() {
           <strong className="brand-title">Email Assistant</strong>
         </div>
 
-        <label className="search">
-          <Search size={15} />
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search sender, subject, PO or reference"
-          />
-          <span className="kbd">/</span>
-        </label>
-
         <div className="top-right">
           <button
             className="theme-toggle"
@@ -326,57 +301,75 @@ export default function App() {
         </div>
       </header>
 
+      <div className="toolbar">
+        <nav className="tabbar" aria-label="Queue filters">
+          {visibleStatusTabs.map((s) => (
+            <TabBtn
+              key={s}
+              label={s}
+              count={counts[s]}
+              active={tab === s}
+              onClick={() => pickTab(s, tab, setTab)}
+            />
+          ))}
+          {visibleStatusTabs.length > 0 && tierTabs.length > 0 && <span className="tab-sep" aria-hidden="true" />}
+          {tierTabs.map((t) => (
+            <TabBtn
+              key={t.key}
+              label={t.key}
+              count={t.count}
+              active={tier === t.key}
+              onClick={() => pickTab(t.key, tier, setTier)}
+            />
+          ))}
+          {(visibleStatusTabs.length > 0 || tierTabs.length > 0) && intentTabs.length > 0 && (
+            <span className="tab-sep" aria-hidden="true" />
+          )}
+          {intentTabs.map((i) => (
+            <TabBtn
+              key={i.key}
+              label={i.key}
+              count={i.count}
+              active={intent === i.key}
+              onClick={() => pickTab(i.key, intent, setIntent)}
+            />
+          ))}
+        </nav>
+        <div className="toolbar-right">
+          {bulk.length > 0 && (
+            <div className="toolbar-bulk">
+              <span className="toolbar-drafts">
+                <Zap size={14} />
+                <b className="mono">{bulk.length}</b>
+                {bulk.length === 1 ? 'draft' : 'drafts'}
+              </span>
+              {bulk.length > 1 && (
+                <button type="button" className="toolbar-send" onClick={approveAll}>
+                  <Check size={13} />
+                  Send all
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
       <div className="body">
         <section className="pane queue">
           <div className="pane-hd">
-            <Inbox size={16} style={{ color: 'var(--blue)' }} />
+            <Inbox size={16} style={{ color: 'var(--blue)', flex: '0 0 auto' }} />
             <h2>Inbox queue</h2>
-            <span className="mono" style={{ color: 'var(--label-3)', fontSize: 12 }}>
-              {list.length}
-            </span>
-            <button className="icon-btn" style={{ marginLeft: 'auto' }} title="Refresh">
-              <RefreshCw size={14} />
-            </button>
+            <span className="mono queue-count">{list.length}</span>
+            <label className="queue-search">
+              <Search size={14} />
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search sender, PO, subject…"
+              />
+              <span className="kbd">/</span>
+            </label>
           </div>
-
-          <div className="filters">
-            <Menu
-              value={tab}
-              options={['All', 'Pending', 'Edited', 'Approved', 'Manual']}
-              onPick={setTab}
-              active={tab !== 'All'}
-              counts={counts}
-            />
-            <Menu
-              value={tier}
-              displayValue={tier === 'All tiers' ? 'Tiers' : tier}
-              options={TIERS}
-              onPick={setTier}
-              active={tier !== 'All tiers'}
-            />
-            <Menu
-              value={intent}
-              displayValue={intent === 'All intents' ? 'Intents' : intent.split(' ')[0]}
-              options={INTENTS}
-              onPick={setIntent}
-              active={intent !== 'All intents'}
-            />
-          </div>
-
-          {bulk.length > 1 && (
-            <div className="bulk">
-              <Zap size={15} style={{ color: 'var(--green)', flex: '0 0 auto' }} />
-              <p>
-                <b className="mono">{bulk.length}</b> drafts at {AUTO_OK}%+ confidence
-                <br />
-                <span>Same acknowledgement pattern</span>
-              </p>
-              <button className="send-all" onClick={approveAll}>
-                <Check size={13} />
-                Send all
-              </button>
-            </div>
-          )}
 
           {list.length === 0 ? (
             <div className="empty">
@@ -413,8 +406,8 @@ export default function App() {
                           <span className="tag go">Sent</span>
                         ) : st === 'edited' ? (
                           <span className="tag">Edited</span>
-                        ) : e.tier === 'Review' ? (
-                          <span className="tag hold">Review</span>
+                        ) : e.tier === 'Review' || e.tier === 'Escalation' ? (
+                          <span className="tag hold">{e.tier}</span>
                         ) : (
                           <span className="tag mute">{e.sub.split(' / ')[0]}</span>
                         )}
@@ -533,7 +526,31 @@ export default function App() {
                 )}
               </div>
 
-              <div className="msg-body">{sel.body}</div>
+              <div className="msg-body">
+                {sel.body}
+                {sel.table && (
+                  <div className="mail-table-wrap">
+                    <table className="mail-table">
+                      <thead>
+                        <tr>
+                          {sel.table.headers.map((h) => (
+                            <th key={h}>{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {sel.table.rows.map((row, i) => (
+                          <tr key={i}>
+                            {row.map((cell, j) => (
+                              <td key={j}>{cell}</td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
             </article>
           </div>
         </section>
@@ -583,62 +600,76 @@ export default function App() {
           </div>
 
           <div className="draft-scroll">
-            <div className="card">
-              <div className="card-hd">
-                <span className="eyebrow">Classification</span>
-                <button type="button" className="link-btn">
-                  <Pencil size={12} />
-                  Change
-                </button>
+            <div className="draft-classify">
+              <div className="draft-classify-top">
+                <div className="draft-chip-row">
+                  <span className="draft-chip">{sel.dept}</span>
+                  <span className="draft-chip">{sel.intent}</span>
+                  <span
+                    className="draft-chip"
+                    data-tone={sel.tier === 'Review' || sel.tier === 'Escalation' ? 'warn' : 'ok'}
+                  >
+                    {sel.tier}
+                  </span>
+                </div>
+                <div className="draft-conf">
+                  <div className="draft-conf-score">
+                    <span className="meta-key">Confidence</span>
+                    <b className="mono" style={{ color: confTone }}>
+                      {sel.confidence}%
+                    </b>
+                  </div>
+                  <div className="bar">
+                    <i style={{ width: `${sel.confidence}%`, background: confTone }} />
+                  </div>
+                  <button type="button" className="link-btn draft-edit-btn">
+                    <Pencil size={12} />
+                    Edit
+                  </button>
+                </div>
               </div>
-              <div className="meta-grid">
-                <div className="meta-row">
-                  <span className="meta-key">Department</span>
-                  <span className="meta-val">{sel.dept}</span>
-                </div>
-                <div className="meta-row">
-                  <span className="meta-key">Intent</span>
-                  <span className="meta-val">{sel.intent}</span>
-                </div>
-                <div className="meta-row">
-                  <span className="meta-key">Subtype</span>
-                  <span className="meta-val">{sel.sub}</span>
-                </div>
-              </div>
-              <div className="conf">
-                <span className="meta-key">Confidence</span>
-                <div className="bar">
-                  <i style={{ width: `${sel.confidence}%`, background: confTone }} />
-                </div>
-                <span className="v mono" style={{ color: confTone }}>
-                  {sel.confidence}%
+              <div className="draft-classify-meta">
+                <span>{sel.sub}</span>
+                <span className="draft-meta-dot" aria-hidden="true">
+                  ·
                 </span>
+                <span className="draft-reason">{sel.reason}</span>
               </div>
             </div>
 
-            <div className="route">
-              <div>
-                <span className="meta-key">Routing tier</span>
-                <b style={{ color: sel.tier === 'Review' ? 'var(--red)' : 'var(--label-1)' }}>{sel.tier}</b>
-              </div>
-              <div>
-                <span className="meta-key">Reason</span>
-                <b>{sel.reason}</b>
-              </div>
-            </div>
-
-            <div className="card draft-block">
-              <div className="card-hd" style={{ marginBottom: 0 }}>
-                <span className="eyebrow">Draft</span>
-                {sel.langs.length > 1 && (
-                  <div className="lang">
-                    {sel.langs.map((l) => (
+            <div className="draft-main">
+              <div className="draft-main-hd">
+                <span className="eyebrow">Reply draft</span>
+                <div className="draft-main-tools">
+                  {sel.langs.length > 1 && (
+                    <div className="lang">
+                      {sel.langs.map((l) => (
+                        <button
+                          key={l}
+                          type="button"
+                          data-on={selLang === l ? '1' : '0'}
+                          onClick={() => {
+                            setLang((s) => ({ ...s, [sel.id]: l }))
+                            setDrafts((d) => {
+                              const n = { ...d }
+                              delete n[sel.id]
+                              return n
+                            })
+                          }}
+                        >
+                          {l}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  <div className="tone">
+                    {sel.tones.map((t) => (
                       <button
-                        key={l}
+                        key={t.id}
                         type="button"
-                        data-on={selLang === l ? '1' : '0'}
+                        data-on={selTone.id === t.id ? '1' : '0'}
                         onClick={() => {
-                          setLang((s) => ({ ...s, [sel.id]: l }))
+                          setTone((s) => ({ ...s, [sel.id]: t.id }))
                           setDrafts((d) => {
                             const n = { ...d }
                             delete n[sel.id]
@@ -646,31 +677,11 @@ export default function App() {
                           })
                         }}
                       >
-                        {l}
+                        {t.label}
                       </button>
                     ))}
                   </div>
-                )}
-              </div>
-
-              <div className="tone">
-                {sel.tones.map((t) => (
-                  <button
-                    key={t.id}
-                    type="button"
-                    data-on={selTone.id === t.id ? '1' : '0'}
-                    onClick={() => {
-                      setTone((s) => ({ ...s, [sel.id]: t.id }))
-                      setDrafts((d) => {
-                        const n = { ...d }
-                        delete n[sel.id]
-                        return n
-                      })
-                    }}
-                  >
-                    {t.label}
-                  </button>
-                ))}
+                </div>
               </div>
 
               <div className="composer">
