@@ -99,13 +99,13 @@ function AttachmentPopup({ file, onClose }) {
 
 function useTheme() {
   const [theme, setTheme] = useState(() => {
-    const saved = localStorage.getItem('ca-theme-v2')
+    const saved = localStorage.getItem('ca-theme-v3')
     return saved === 'dark' ? 'dark' : 'light'
   })
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
-    localStorage.setItem('ca-theme-v2', theme)
+    localStorage.setItem('ca-theme-v3', theme)
   }, [theme])
 
   return [theme, setTheme]
